@@ -46,6 +46,7 @@ import random
 ##################################################################################################
 #set variables
 runName = ""
+logStr = ""
 DESIRED_DIST = range(61, 107)
 MAX_DIST = 200
 finalState = "none"
@@ -60,34 +61,39 @@ def rock():
     bwd()
     sleep(.2)
     stop()
+    
+def log(x):
+    print x
+    x += "\n"
+    logStr += x
 ###################################################################################################
 ###################################################################################################
 #main autonymous loop. GoPiGo will follow you around!
 def followMe():
     finalState = "Following"
-    print "Following."
+    log("Following.")
     while noProblem:
         stop()
         servo(70)
         sleep(1)
         if (getDistance() <= 3):
-            print "You scared me!"
+            log("You scared me!")
             scared()
         #check vertical
         elif(getDistance() > 3 and getDistance() < DESIRED_DIST[0]): #if less than desired distance, but not obscured
-            print "Target moved closer."
+            log("Target moved closer.")
             adjust(bwd, False)
-            print "Backed up."
+            log("Backed up.")
         elif(getDistance() > DESIRED_DIST[-1] and getDistance() < MAX_DIST): #if greater than desired distance, but target still in sight
-            print "Target moved away."
+            log("Target moved away.")
             adjust(fwd, False)
-            print "Followed."
+            log("Followed.")
         elif(getDistance() in DESIRED_DIST):
-            print "Desired distance reached."
+            log("Desired distance reached.")
             #check horizontal while in rest
             check = checkLeftRight()
             if (check == "left"):
-                print "Target went left."
+                log("Target went left.")
                 #rotate left and adjust sensor
                 enable_encoders()
                 enc_tgt(1,0,x)
@@ -96,9 +102,9 @@ def followMe():
                 disable_encoders()
                 servo(70)
                 sleep(1)
-                print "Target followed left."
+                log("Target followed left.")
             elif(check == "right"):
-                print "Target moved right."
+                log("Target moved right.")
                 #rotate right and adjust sensor
                 enable_encoders()
                 enc_tgt(0,1,x)
@@ -107,9 +113,9 @@ def followMe():
                 disable_encoders()
                 servo(70)
                 sleep(1)
-                print "Target followed right."
+                log("Target followed right.")
             elif(check == "out of range"):
-                print "Target lost!"
+                log("Target lost!")
                 spin()
             elif(check == "fine"):
                 #back to top of while loop.
@@ -156,22 +162,22 @@ def runAway():
     sleep(1)
     right_dir = getDistance()
     if(left_dir > right_dir and left_dir > 30):
-        print "Left!"
+        log("Left!")
         left()
         sleep(1)
     elif(left_dir < right_dir and right_dir > 30):
-        print "Right!"
+        log("Right!")
         right()
         sleep(1)
     while noProblem:
         servo(70)
         sleep(1)
         if(getDistance() > DESIRED_DIST[0])
-        print "Running!"
+        log("Running!")
         fwd()
         sleep(1)
         else:
-            print "Which way is clear??!"
+            log("Which way is clear??!")
             servo(28)
             sleep(1)
             left_dir = getDistance()
@@ -179,15 +185,15 @@ def runAway():
             sleep(1)
             right_dir = getDistance()
             if(left_dir > right_dir and left_dir > 30):
-                print "Left!"
+                log("Left!")
                 left()
                 sleep(1)
             elif(left_dir < right_dir and right_dir > 30):
-                print "Right!"
+                log("Right!")
                 right()
                 sleep(1)
             else:
-                print "No good!"
+                log("No good!")
                 rot_choices = [right_rot, left_rot]
                 rotation = rot_choices[random.randrange(0,2)]
                 rotation()
@@ -197,18 +203,18 @@ def scared():
     finalState = "Scared"
     bwd()
     sleep(3)
-    print "Now safe."
+    log("Now safe.")
     while noProblem:
         stop()
         servo(70)
         if(getDistance() == 6):
-            print "AAAAAHHHHHHHHHHHH!!!!!!!!"
+            log("AAAAAHHHHHHHHHHHH!!!!!!!!")
             runAway()
         else:
             #scared stuff
             enable_encoders()
             while(getDistance() > DESIRED_DIST[-1] or checkLeftRight != "fine"):
-                print "Still scared..."
+                log("Still scared...")
                 rock()
                 rock()
                 rock()
@@ -218,28 +224,28 @@ def scared():
                 sleep(1)
                 servo(70)
                 sleep(1)
-                print "...."
+                log("....")
             disable_encoders()
             #dont follow, only back away
             if (getDistance() <= DESIRED_DIST[-1]): #the bot will stay away at a distance minimum the max in the normal range
-                print "Too close!"
+                log("Too close!")
                 adjust(bwd, True)
-                print "Now safe."
+                log("Now safe.")
             else:
                 #if the target moves left or right, turn to face it
                 check = checkLeftRight()
                 if(check == "left"):
-                    print "I saw you move left!"
+                    log("I saw you move left!")
                     enc_tgt(1,1,x)
                     left_rot()
                     sleep(1)
-                    print "Now safe."
+                    log("Now safe.")
                 elif(check == "right"):
-                    print "I saw you move right!"
+                    log("I saw you move right!")
                     enc_tgt(1,1,x)
                     right_rot()
                     sleep(1)
-                    print "Now safe."
+                    log("Now safe.")
                 else:
                     noProblem = False
     if(!noProblem):
@@ -259,7 +265,7 @@ def spin():
         sleep(1)
         right_dir = getDistance()
         if(left_dir in DESIRED_DIST):
-            print "Target found."
+            log("Target found.")
             found = True
             enc_tgt(1,1,x) #rotate encoders x times to match the angle of the servo
             left_rot()
@@ -267,7 +273,7 @@ def spin():
             servo(70)
             sleep(1)
         elif(right_dir in DESIRED_DIST):
-            print "Target found."
+            log("Target found.")
             found = True
             enc_tgt(1,1,x) #rotate encoders x times to match the angle of the servo
             right_rot()
@@ -275,7 +281,7 @@ def spin():
             servo(70)
             sleep(1)
         else:
-            print "Not here."
+            log("Not here.")
             rot_choices = [right_rot, left_rot]
             rotation = rot_choices[random.randrange(0,2)]
             rotation()
@@ -285,37 +291,37 @@ def adjust(direction, scared): #there may be a way to do this with the encoders.
     done = False
     if !scared:
         while !done:
-            print "moving..."
+            log("moving...")
             direction()
             sleep(1)
             if(getDistance() in DESIRED_DIST):
                 done = True
-        print "moved."
+        log("moved.")
     else:
         while !done:
-            print "backing away..."
+            log("backing away...")
             bwd()
             sleep()
             if(getDistance() >= DESIRED_DIST[-1]):
                 done = True
-        print "Now safe."
+        log("Now safe.")
 ####################################################################################################
 def startup():
-    print "Booting..."
+    log("Booting...")
     stop()
     enable_servo()
     #adjust the sensor to face front
     servo(70)
-    print "Servo setup complete."
+    log("Servo setup complete.")
     #have the robot do a dance
     dance()
     stop()
-    print "Dance sequence complete."
+    log("Dance sequence complete.")
     #then start working after the sensor is obscured
     while noProblem:
         if (getDistance() == 0):
             adjust(bwd, False)
-            print "Startup complete."
+            log("Startup complete.")
             followMe()
 ####################################################################################################
 
@@ -324,13 +330,14 @@ try:
     runName = "run_log_" + runName
     startup()
 except KeyboardInterrupt:
-    print "Run ended!. Summary: \n" + read_status() + "\n"
-    print "Variables: \n DESIRED_DIST: " + DESIRED_DIST + "\n MAX_DIST: " + MAX_DIST + "\n Current Distance: " + getDistance() + "\n Final State Reached: " + finalState
+    log("Run ended!. Summary: \n" + read_status() + "\n")
+    log("Variables: \n DESIRED_DIST: " + DESIRED_DIST + "\n MAX_DIST: " + MAX_DIST + "\n Current Distance: " + getDistance() + "\n Final State Reached: " + finalState)
     #create a file with a log of all the activity.
+    outfile = file(runName, "w")
+    outfile.write(logStr)
 except:
-    print "Error reached. Summary: \n" + read_status() + "\n"
-    print "Variables: \n DESIRED_DIST: " + DESIRED_DIST + "\n MAX_DIST: " + MAX_DIST + "\n Current Distance: " + getDistance() + "\n Final State Reached: " + finalState
+    log("Error reached. Summary: \n" + read_status() + "\n")
+    log("Variables: \n DESIRED_DIST: " + DESIRED_DIST + "\n MAX_DIST: " + MAX_DIST + "\n Current Distance: " + getDistance() + "\n Final State Reached: " + finalState)
     #create a file with a log of all the activity.
-
-outfile = file(runName, "w")
-outfile.write(logStr)
+    outfile = file(runName, "w")
+    outfile.write(logStr)
