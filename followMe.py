@@ -81,22 +81,22 @@ def dance(): #cha cha?? and spin around 3 times
 ####################################################################################################
 def runAway():
     #prepare in case against a wall
-    servo(28)
-    sleep(1)
+    servo(71)
+    sleep(.6)
     left_dir = dist()
-    servo(112)
-    sleep(1)
+    servo(160)
+    sleep(.6)
     right_dir = dist()
     if(left_dir > right_dir and left_dir > 30):
         print "Left!"
         left()
-        sleep(1)
+        sleep(1) #
     elif(left_dir < right_dir and right_dir > 30):
         print "Right!"
         right()
         sleep(1)
-    while noProblem:
-        servo(70)
+    while True:
+        servo(113)
         sleep(1)
         if(dist() > DESIRED_DIST[0]):
             print "Running!"
@@ -104,10 +104,10 @@ def runAway():
             sleep(1)
         else:
             print "Which way is clear??!"
-            servo(28)
+            servo(71)
             sleep(1)
             left_dir = dist()
-            servo(112)
+            servo(160)
             sleep(1)
             right_dir = dist()
             if(left_dir > right_dir and left_dir > 30):
@@ -131,8 +131,8 @@ def scared():
     print "Now safe."
     while True:
         stop()
-        servo(70)
-        if(dist == 6):
+        servo(113)
+        if(dist() <= 6):
             print "AAAAAHHHHHHHHHHHH!!!!!!!!"
             runAway()
         else:
@@ -141,13 +141,12 @@ def scared():
                 print "Still scared..."
                 rock()
                 rock()
-                rock()
-                servo(30) #look to one side
-                sleep(1)
-                servo(120) #look to the other side
-                sleep(1)
-                servo(70)
-                sleep(1)
+                servo(73) #look to one side
+                sleep(.5)
+                servo(153) #look to the other side
+                sleep(.5)
+                servo(113)
+                sleep(.5)
                 print "...."
             #dont follow, only back away
             if (dist() <= DESIRED_DIST[-1]): #the bot will stay away at a distance minimum the max in the normal range
@@ -160,13 +159,13 @@ def scared():
                 check = checkLeftRight()
                 if(check == "left"):
                     print "I saw you move left!"
-                    enc_tgt(1,1,x)
+                    enc_tgt(1,1,x) #use degrees and circumference to calculate
                     left_rot()
                     sleep(1)
                     print "Now safe."
                 elif(check == "right"):
                     print "I saw you move right!"
-                    enc_tgt(1,1,x)
+                    enc_tgt(1,1,x) #use degrees and circumference to calculate
                     right_rot()
                     sleep(1)
                     print "Now safe."
@@ -179,10 +178,10 @@ def scared():
 def spin():
     found = False
     while(found == False):
-        servo(28)
+        servo(71)
         sleep(1)
         left_dir = dist()
-        servo(112)
+        servo(160)
         sleep(1)
         right_dir = dist()
         if(left_dir in DESIRED_DIST):
@@ -191,7 +190,7 @@ def spin():
             enc_tgt(1,1,x) #rotate encoders x times to match the angle of the servo
             left_rot()
             sleep(1)
-            servo(70)
+            servo(113)
             sleep(1)
         elif(right_dir in DESIRED_DIST):
             print "Target found."
@@ -199,7 +198,7 @@ def spin():
             enc_tgt(1,1,x) #rotate encoders x times to match the angle of the servo
             right_rot()
             sleep(1)
-            servo(70)
+            servo(113)
             sleep(1)
         else:
             print "Not here."
@@ -233,7 +232,7 @@ try:
     stop()
     enable_servo()
     #adjust the sensor to face front
-    servo(70)
+    servo(113)
     print "Servo setup complete."
     #have the robot do a dance
     dance()
@@ -247,7 +246,7 @@ try:
             print "Startup complete."
         print "Following."
         while True: #main autonymous loop. GoPiGo will follow you around!
-            servo(70)
+            servo(113)
             sleep(1)
             if (dist() == 0):
                 print "You scared me!"
@@ -269,7 +268,7 @@ try:
                     print "Target went left."
                     #rotate left and adjust sensor
                     enable_encoders()
-                    enc_tgt(1,0,x)
+                    enc_tgt(1,1,x) #rotate encoders x times to match the angle of the servo
                     left_rot()
                     sleep(1)
                     disable_encoders()
@@ -280,7 +279,7 @@ try:
                     print "Target moved right."
                     #rotate right and adjust sensor
                     enable_encoders()
-                    enc_tgt(0,1,x)
+                    enc_tgt(1,1,x) #rotate encoders x times to match the angle of the servo
                     right_rot()
                     sleep(1)
                     disable_encoders()
