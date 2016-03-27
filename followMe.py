@@ -50,31 +50,49 @@ MAX_DIST = 200
 def dist():
     return us_dist(15)
 
-def rock():
-    fwd()
-    sleep(.2)
-    stop()
-    bwd()
-    sleep(.2)
-    stop()
 ###################################################################################################
+def idle():
+    actions = ["rock", "rock", "look", "look", "rotate", "rotate", "nothing"]
+    action = actions[random.randrange(0,7)]
+    if(action == "rock"):
+        for i in range(4):
+            enc_tgt(1,1,1)
+            fwd()
+            sleep(.1)
+            enc_tgt(1,1,1)
+            bwd()
+            sleep(.1)
+    elif(action == "look"):
+        servo(71)
+        sleep(.5)
+        servo(155)
+        sleep(.5)
+    elif(action == "rotate"):
+        rot_choices = [right_rot, left_rot]
+        rotation = rot_choices[random.randrange(0,2)]
+        enc_tgt(1,1,3)
+        rotation()
+        sleep(.5)
+    elif(action == "nothing"):
+        sleep(1.5)
+    servo(113)
+    sleep(.2)
 ###################################################################################################
 def checkLeftRight():
-    while True:
-        servo(123) #slightly left
-        sleep(.2)
-        leftSide = dist()
-        servo(103) #slightly right
-        sleep(.2)
-        rightSide = dist()
-        if (rightSide > MAX_DIST and leftSide < MAX_DIST):
-            return "left"
-        elif (rightSide > MAX_DIST and leftSide > MAX_DIST):
-            return "out of range"
-        elif (rightSide > MAX_DIST and leftSide < MAX_DIST):
-            return "right"
-        else:
-            print "I still see you! :)"
+    servo(123) #slightly left
+    sleep(.2)
+    leftSide = dist()
+    servo(103) #slightly right
+    sleep(.2)
+    rightSide = dist()
+    if (rightSide > MAX_DIST and leftSide < MAX_DIST):
+        return "left"
+    elif (rightSide > MAX_DIST and leftSide > MAX_DIST):
+        return "out of range"
+    elif (rightSide > MAX_DIST and leftSide < MAX_DIST):
+        return "right"
+    else:
+        print "I still see you! :)"
 ####################################################################################################
 def dance(): #cha cha?? and spin around 3 times
     print "I'm a dancin' machine!!!!!!!!"
@@ -83,14 +101,14 @@ def runAway():
     #prepare in case against a wall
     servo(71)
     sleep(.6)
-    left_dir = dist()
-    servo(160)
-    sleep(.6)
     right_dir = dist()
+    servo(155)
+    sleep(.6)
+    left_dir = dist()
     if(left_dir > right_dir and left_dir > 30):
         print "Left!"
         left()
-        sleep(1) #
+        sleep(1)
     elif(left_dir < right_dir and right_dir > 30):
         print "Right!"
         right()
@@ -106,10 +124,10 @@ def runAway():
             print "Which way is clear??!"
             servo(71)
             sleep(1)
-            left_dir = dist()
+            right_dir = dist()
             servo(160)
             sleep(1)
-            right_dir = dist()
+            left_dir = dist()
             if(left_dir > right_dir and left_dir > 30):
                 print "Left!"
                 left()
@@ -137,16 +155,9 @@ def scared():
             runAway()
         else:
             #scared stuff
-            while(dist() > DESIRED_DIST[-1] or checkLeftRight != "fine"): #play around with this, you might still be able to make everything happen at once
+            while(dist() > DESIRED_DIST[-1] or checkLeftRight != "fine"):
                 print "Still scared..."
-                rock()
-                rock()
-                servo(73) #look to one side
-                sleep(.5)
-                servo(153) #look to the other side
-                sleep(.5)
-                servo(113)
-                sleep(.5)
+                idle()
                 print "...."
             #dont follow, only back away
             if (dist() <= DESIRED_DIST[-1]): #the bot will stay away at a distance minimum the max in the normal range
@@ -159,13 +170,15 @@ def scared():
                 check = checkLeftRight()
                 if(check == "left"):
                     print "I saw you move left!"
-                    enc_tgt(1,1,x) #use degrees and circumference to calculate
+                    servo(113)
+                    enc_tgt(1,1,1)
                     left_rot()
                     sleep(1)
                     print "Now safe."
                 elif(check == "right"):
                     print "I saw you move right!"
-                    enc_tgt(1,1,x) #use degrees and circumference to calculate
+                    servo(113)
+                    enc_tgt(1,1,1)
                     right_rot()
                     sleep(1)
                     print "Now safe."
@@ -179,33 +192,31 @@ def spin():
     found = False
     while(found == False):
         servo(71)
-        sleep(1)
-        left_dir = dist()
-        servo(160)
-        sleep(1)
+        sleep(.5)
         right_dir = dist()
-        if(left_dir in DESIRED_DIST):
-            print "Target found."
+        servo(155)
+        sleep(.5)
+        left_dir = dist()
+        if(right_dir in DESIRED_DIST):
+            print "Target found on the right."
             found = True
-            enc_tgt(1,1,x) #rotate encoders x times to match the angle of the servo
-            left_rot()
-            sleep(1)
             servo(113)
-            sleep(1)
-        elif(right_dir in DESIRED_DIST):
-            print "Target found."
-            found = True
-            enc_tgt(1,1,x) #rotate encoders x times to match the angle of the servo
+            enc_tgt(1,1,3)
             right_rot()
-            sleep(1)
+            sleep(.5)
+        elif(left_dir in DESIRED_DIST):
+            print "Target found on the left."
+            found = True
             servo(113)
-            sleep(1)
+            enc_tgt(1,1,3)
+            left_rot()
+            sleep(.5)
         else:
             print "Not here."
             rot_choices = [right_rot, left_rot]
             rotation = rot_choices[random.randrange(0,2)]
             rotation()
-            sleep(1)
+            sleep(.5)
 ####################################################################################################
 def adjust(direction, scared): #there may be a way to do this with the encoders. Think about it!
     if(scared == False):
@@ -247,7 +258,7 @@ try:
         print "Following."
         while True: #main autonymous loop. GoPiGo will follow you around!
             servo(113)
-            sleep(1)
+            sleep(.5)
             if (dist() == 0):
                 print "You scared me!"
                 scared()
@@ -263,12 +274,14 @@ try:
             elif(dist() in DESIRED_DIST):
                 print "Desired distance reached."
                 #check horizontal while in rest
+                print "checking left right"
                 check = checkLeftRight()
+                print "left right stored"
                 if (check == "left"):
                     print "Target went left."
                     #rotate left and adjust sensor
                     enable_encoders()
-                    enc_tgt(1,1,x) #rotate encoders x times to match the angle of the servo
+                    enc_tgt(1,1,1)
                     left_rot()
                     sleep(1)
                     disable_encoders()
@@ -279,12 +292,12 @@ try:
                     print "Target moved right."
                     #rotate right and adjust sensor
                     enable_encoders()
-                    enc_tgt(1,1,x) #rotate encoders x times to match the angle of the servo
+                    enc_tgt(1,1,1)
                     right_rot()
                     sleep(1)
                     disable_encoders()
                     servo(113)
-                    sleep(1)
+                    sleep(.5)
                     print "Target followed right."
                 elif(check == "out of range"):
                     print "Target lost!"
@@ -296,10 +309,4 @@ except KeyboardInterrupt:
     disable_servo()
     disable_encoders()
     print "Run ended! Keyboard Interrupt. Summary: \n"
-    print "Variables: \n DESIRED_DIST: " + str(DESIRED_DIST[0]) + "," + str(DESIRED_DIST[-1]) + "\n MAX_DIST: " + str(MAX_DIST) + "\n Current Distance: " + str(dist())
-except:
-    stop()
-    disable_servo()
-    disable_encoders()
-    print "Run ended!. Summary: \n"
     print "Variables: \n DESIRED_DIST: " + str(DESIRED_DIST[0]) + "," + str(DESIRED_DIST[-1]) + "\n MAX_DIST: " + str(MAX_DIST) + "\n Current Distance: " + str(dist())
