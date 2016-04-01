@@ -96,6 +96,10 @@ def checkLeftRight():
 ####################################################################################################
 def dance(): #cha cha?? and spin around 3 times
     print "I'm a dancin' machine!!!!!!!!"
+    #test the versatility of the encoders.
+    #try enc_tgt(1,0,x) + rot() instead of enc_tgt(1,1,x) + rot()
+    #to make the bot thinks its rotating but its actually rotating around one wheel.
+    #this will allow you to cha cha!
 ####################################################################################################
 def runAway():
     #prepare in case against a wall
@@ -166,7 +170,6 @@ def scared():
                 print "Now safe."
             else:
                 #if the target moves left or right, turn to face it
-                enable_encoders()
                 check = checkLeftRight()
                 if(check == "left"):
                     print "I saw you move left!"
@@ -184,9 +187,6 @@ def scared():
                     print "Now safe."
                 elif(check == "fine"):
                     print "Still scared..."
-                else:
-                    print "Unexpected value in checkLeftRight()"
-                disable_encoders()
 ####################################################################################################
 def spin():
     found = False
@@ -242,6 +242,7 @@ try:
     print "Booting..."
     stop()
     enable_servo()
+    enable_encoders()
     #adjust the sensor to face front
     servo(113)
     print "Servo setup complete."
@@ -280,22 +281,18 @@ try:
                 if (check == "left"):
                     print "Target went left."
                     #rotate left and adjust sensor
-                    enable_encoders()
                     enc_tgt(1,1,1)
                     left_rot()
                     sleep(1)
-                    disable_encoders()
                     servo(113)
                     sleep(1)
                     print "Target followed left."
                 elif(check == "right"):
                     print "Target moved right."
                     #rotate right and adjust sensor
-                    enable_encoders()
                     enc_tgt(1,1,1)
                     right_rot()
                     sleep(1)
-                    disable_encoders()
                     servo(113)
                     sleep(.5)
                     print "Target followed right."
