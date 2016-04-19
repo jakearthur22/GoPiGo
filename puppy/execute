@@ -1,6 +1,8 @@
 #this is the main code through which all over code will run
-import func.py
-import except.py
+from func import dist
+from func import reset
+from func import 
+import except
 
 try:
     print "Booting..."
