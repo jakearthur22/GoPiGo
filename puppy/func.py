@@ -163,6 +163,7 @@ def dance():
     enc_tgt(1,1,1)
     fwd()
     sleep(.5)
+    stop()
 ####################################################################################################
 def runAway():
     #prepare in case against a wall
@@ -291,3 +292,40 @@ def adjust(direction, frightened):
         print "Now safe."
 ####################################################################################################
 def kill():
+    stop()
+    disable_servo()
+    disable_encoders()
+####################################################################################################
+def reset():
+    kill()
+    enable_servo()
+    enable_encoders()
+    servo(113)
+####################################################################################################
+def run():
+    while True:
+        if (dist() <= 6):
+            adjust(bwd, False)
+            print "Startup complete."
+            while True: #main autonymous loop. GoPiGo will follow you around!
+                print "Following."
+                servo(113)
+                sleep(.5)
+                if (dist() <= 6):
+                    print "You scared me!"
+                    scared()
+                #check vertical
+                elif(dist() < DESIRED_DIST[0]): #if less than desired distance, but not obscured
+                    print "Target moved closer."
+                    adjust(bwd, False)
+                    print "Backed up."
+                elif(dist() > DESIRED_DIST[-1] and dist() < MAX_DIST): #if greater than desired distance, but target still in sight
+                    print "Target moved away."
+                    adjust(fwd, False)
+                    print "Followed."
+                elif(dist() in DESIRED_DIST):
+                    print "Desired distance reached."
+                    #check horizontal while in rest
+                    print "Checking left and right..."
+                    checkLeftRight()
+####################################################################################################
