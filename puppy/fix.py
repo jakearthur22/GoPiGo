@@ -1,5 +1,5 @@
 #this will contain the code for the exception
-from func import kill
+from puppy.func import kill
 
 def keyboard():
   kill()
