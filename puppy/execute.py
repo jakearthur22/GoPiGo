@@ -1,6 +1,6 @@
 #this is the main code through which all other code will run
-import func
-import fix
+import puppy.func
+import puppy.fix
 
 try:
     print "Booting..."
