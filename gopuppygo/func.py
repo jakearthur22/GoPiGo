@@ -3,8 +3,8 @@ from gopigo import *
 from time import sleep
 import random
 ###################################################################################################
-DESIRED_DIST = range(61, 107)
-MAX_DIST = 250
+DESIRED_DIST = range(61, 121)
+MAX_DIST = 300
 def dist():
     return us_dist(15)
 s = -1
@@ -45,29 +45,31 @@ def idle():
 ###################################################################################################
 def checkLeftRight():
     set_servo(113)
-    sleep(1)
+    sleep(.5)
     lost = False
     count = 0
     found = False
     for i in range(10):
-        if(dist() in DESIRED_DIST): found = True
+        if(dist() < DESIRED_DIST[-1]): found = True
         else:
+            print dist()
+            print "Checking left and right.."
             pos = servo_val()
             set_servo(pos-12)
             sleep(.1)
-            if(dist() in DESIRED_DIST): found = True
+            if(dist() < DESIRED_DIST[-1]): found = True
             else:
                 set_servo(pos+12)
                 sleep(.1)
-                if(dist() in DESIRED_DIST): found = True
+                if(dist() < DESIRED_DIST[-1]): found = True
                 else:
                     set_servo(pos-24)
                     sleep(.15)
-                    if(dist() in DESIRED_DIST): found = True
+                    if(dist() < DESIRED_DIST[-1]): found = True
                     else:
                         set_servo(pos+24)
                         sleep(.15)
-                        if(dist() in DESIRED_DIST): found = True
+                        if(dist() < DESIRED_DIST[-1]): found = True
                         else:
                             count += 1
                             if(count == 3):
@@ -76,20 +78,16 @@ def checkLeftRight():
     pos = servo_val()
     if(lost):
         print "Target lost!"
-        #spin()
+        spin()
     elif(pos<113):
-        print "right"
         rot = int(round(float(113-pos) * .0694008))
-        print rot
         servo(113)
         enc_tgt(1,1,rot)
         right_rot()
         sleep(.5)
         print "Target followed right."
     elif(pos>113):
-        print "left"
         rot = int(round(float(pos-113) * .0694008))
-        print rot
         servo(113)
         enc_tgt(1,1,rot)
         left_rot()
@@ -128,7 +126,7 @@ def dance():
     #spin and step and jump
     enc_tgt(1,1,18)
     right_rot()
-    sleep(4)
+    sleep(2)
     enc_tgt(1,0,2)
     right()
     sleep(1)
@@ -147,7 +145,7 @@ def dance():
     #spin and step and jump other direction
     enc_tgt(1,1,18)
     left_rot()
-    sleep(4)
+    sleep(2)
     enc_tgt(0,1,2)
     left()
     sleep(1)
@@ -163,7 +161,6 @@ def dance():
     enc_tgt(1,1,1)
     fwd()
     sleep(.5)
-    stop()
 ####################################################################################################
 def runAway():
     #prepare in case against a wall
@@ -188,6 +185,7 @@ def runAway():
             print "Running!"
             fwd()
             sleep(1)
+            stop()
         else:
             print "Which way is clear??!"
             servo(71)
@@ -200,10 +198,12 @@ def runAway():
                 print "Left!"
                 left()
                 sleep(1)
+                stop()
             elif(left_dir < right_dir and right_dir > 30):
                 print "Right!"
                 right()
                 sleep(1)
+                stop()
             else:
                 print "No good!"
                 rot_choices = [right_rot, left_rot]
@@ -212,6 +212,7 @@ def runAway():
                 sleep(1)
 ####################################################################################################
 def scared():
+    print "You scared me!"
     bwd()
     sleep(3)
     print "Now safe."
@@ -262,32 +263,34 @@ def spin():
             sleep(.5)
         else:
             print "Not here."
+            print dist()
             rot_choices = [right_rot, left_rot]
             rotation = rot_choices[random.randrange(0,2)]
             rotation()
             sleep(.5)
 ####################################################################################################
 def adjust(direction, frightened):
+    moving = True
     if(frightened == False):
-        while True:
+        while moving:
             print "moving..."
             direction()
-            sleep(1)
+            sleep(.5)
             if(dist() <= 6):
                 scared()
             elif(dist() in DESIRED_DIST):
-                break
+                moving = False
         stop()
         print "moved."
     else:
-        while True:
+        while moving:
             print "backing away..."
             bwd()
-            sleep(1)
+            sleep(.5)
             if(dist() <= 6):
                 runAway()
             elif(dist() >= DESIRED_DIST[-1]):
-                break
+                moving = False
         stop()
         print "Now safe."
 ####################################################################################################
@@ -307,6 +310,7 @@ def run():
         if (dist() <= 6):
             adjust(bwd, False)
             print "Startup complete."
+            sleep(2)
             while True: #main autonymous loop. GoPiGo will follow you around!
                 print "Following."
                 servo(113)
@@ -314,7 +318,6 @@ def run():
                 if (dist() <= 6):
                     print "You scared me!"
                     scared()
-                #check vertical
                 elif(dist() < DESIRED_DIST[0]): #if less than desired distance, but not obscured
                     print "Target moved closer."
                     adjust(bwd, False)
@@ -324,8 +327,7 @@ def run():
                     adjust(fwd, False)
                     print "Followed."
                 elif(dist() in DESIRED_DIST):
-                    print "Desired distance reached."
+                    print "Target in sight."
                     #check horizontal while in rest
-                    print "Checking left and right..."
                     checkLeftRight()
 ####################################################################################################
