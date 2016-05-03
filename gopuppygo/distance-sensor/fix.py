@@ -1,8 +1,5 @@
 #this will contain the code for the exception
-from func import kill
-from func import dist
-from func import DESIRED_DIST
-from func import MAX_DIST
+from func import kill, dist, DESIRED_DIST, MAX_DIST
 from gopigo import us_dist
 
 def keyboard():
